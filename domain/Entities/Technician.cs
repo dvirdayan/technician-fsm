@@ -13,4 +13,10 @@ public static class Technician
         EndHours = endHours;
         AssignedTasks = new task[] { };
     }
+    public void AssignTask(task newTask)
+    {
+        var tasksList = AssignedTasks.ToList();
+        tasksList.Add(newTask);
+        AssignedTasks = tasksList.ToArray();
+    }
 }
