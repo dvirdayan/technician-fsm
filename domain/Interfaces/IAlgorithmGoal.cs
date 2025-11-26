@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using FSM.Domain.Entities; // Needed to see TechnicianSchedule
+using Domain.Entities; // TechnicianSchedule
 
 namespace FSM.Domain.Interfaces
 {
