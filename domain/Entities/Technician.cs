@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Domain.Enums; // Assuming SkillSet is defined here
+using FSM.Domain.Enums; // Fix: Updated Namespace
 
 namespace FSM.Domain.Entities
 {
@@ -12,7 +12,6 @@ namespace FSM.Domain.Entities
         public double BaseLatitude { get; set; } 
         public double BaseLongitude { get; set; } 
 
-        // enum representing the skills of the technician
         public SkillSet Skills { get; set; } 
 
         public TimeSpan ShiftStart { get; set; } 
@@ -23,12 +22,11 @@ namespace FSM.Domain.Entities
         
         public decimal HourlyCost { get; set; } 
 
-        // links to the daily schedules
         public virtual ICollection<TechnicianSchedule> Schedules { get; set; } = new List<TechnicianSchedule>();
 
         public bool HasSkill(SkillSet requiredSkill)
         {
-            return (Skills & requiredSkill) == requiredSkill; // this uses bitwise
+            return (Skills & requiredSkill) == requiredSkill;
         }
 
         public TimeSpan GetShiftDuration()

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Domain.Entities; // TechnicianSchedule
 
-namespace FSM.Domain.Interfaces
+namespace FSM.Domain.Entities
 {
     public interface IAlgorithmGoal
     {

@@ -1,7 +1,7 @@
 using System;
-using Domain.Enums; // Assuming you have your enums here
+using FSM.Domain.Enums; // Fix: Updated Namespace
 
-namespace Domain.Entities
+namespace FSM.Domain.Entities // Fix: Added 'FSM.'
 {
     public class Task
     {
@@ -20,12 +20,10 @@ namespace Domain.Entities
 
         public TaskPriority Priority { get; set; } 
 
-        // Bitwise enum to check if technician has matching skills
         public SkillSet RequiredSkills { get; set; } 
 
         public int? AssignedTechnicianId { get; set; }
         
-        // Navigation property for EF Core (optional but recommended)
         public virtual Technician AssignedTechnician { get; set; }
 
         public int SequenceIndex { get; set; } 
@@ -34,7 +32,8 @@ namespace Domain.Entities
         
         public DateTime? ActualEndTime { get; set; }
 
-        public TaskStatus Status { get; set; } = TaskStatus.Pending;
+        // Fix: Explicitly use the Enum to avoid confusion with System.Threading.Tasks.TaskStatus
+        public FSM.Domain.Enums.TaskStatus Status { get; set; } = FSM.Domain.Enums.TaskStatus.Pending;
 
         public bool IsTimeInWindow(DateTime time)
         {

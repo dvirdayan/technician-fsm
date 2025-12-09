@@ -9,7 +9,7 @@ namespace FSM.Api
 {
     class Program
     {
-        // Keep these public static so the Service can borrow them for seeding if needed
+        // This must be public static so FsmService can access it for seeding
         public static List<Technician> GetDummyTechnicians()
         {
             return new List<Technician>
@@ -35,6 +35,7 @@ namespace FSM.Api
 
         static async System.Threading.Tasks.Task Main(string[] args)
         {
+            // FIX: Initialize the service only once using the parameterless constructor
             var service = new FsmService();
 
             while (true)
@@ -58,6 +59,7 @@ namespace FSM.Api
                         {
                             Console.WriteLine($"[ID: {t.Id}] {t.ClientName} - {t.Priority} (Window: {t.TimeWindowStart.Hour}-{t.TimeWindowEnd.Hour})");
                         }
+                        Console.WriteLine("\nPress any key...");
                         Console.ReadKey();
                         break;
 
@@ -68,6 +70,7 @@ namespace FSM.Api
                     case "3":
                         var results = await service.RunOptimizationAsync();
                         PrintResults(results);
+                        Console.WriteLine("\nPress any key...");
                         Console.ReadKey();
                         break;
 
@@ -88,13 +91,11 @@ namespace FSM.Api
             Console.Write("Duration (hours): ");
             if(double.TryParse(Console.ReadLine(), out double dur)) t.Duration = TimeSpan.FromHours(dur);
             
-            // Simplified Inputs for Demo
+            // Defaults for Demo
             t.Priority = TaskPriority.Regular; 
             t.RequiredSkills = SkillSet.General; 
             t.TimeWindowStart = DateTime.Today.AddHours(9); 
             t.TimeWindowEnd = DateTime.Today.AddHours(17);
-            
-            // Hardcoded location for simplicity (Tel Aviv center)
             t.Latitude = 32.0853; 
             t.Longitude = 34.7818;
 

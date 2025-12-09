@@ -1,4 +1,4 @@
-namespace Domain.Enums // Namespace matches your Task.cs usage
+namespace FSM.Domain.Enums // Fix: Added 'FSM.'
 {
     public enum TaskStatus
     {
