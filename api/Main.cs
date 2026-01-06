@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
 using FSM.Application.Services;
 using FSM.Domain.Entities;
 using FSM.Domain.Enums;
+
+// Alias to use your Domain Task easily
+using TaskEntity = FSM.Domain.Entities.Task;
 
 namespace FSM.Api
 {
     class Program
     {
-        // This must be public static so FsmService can access it for seeding
         public static List<Technician> GetDummyTechnicians()
         {
             return new List<Technician>
@@ -33,20 +35,20 @@ namespace FSM.Api
             };
         }
 
+        // FIX: Explicitly use System.Threading.Tasks.Task to avoid ambiguity
         static async System.Threading.Tasks.Task Main(string[] args)
         {
-            // FIX: Initialize the service only once using the parameterless constructor
             var service = new FsmService();
 
             while (true)
             {
                 Console.Clear();
                 Console.WriteLine("=== FSM SCHEDULER CLI ===");
-                Console.WriteLine($"Database: {service.Tasks.Count} Tasks, {service.Technicians.Count} Technicians");
+                Console.WriteLine($"[Storage] Loaded {service.Tasks.Count} Tasks and {service.Technicians.Count} Technicians from JSON.");
                 Console.WriteLine("-----------------------");
-                Console.WriteLine("1. List All Tasks");
-                Console.WriteLine("2. Add New Task");
-                Console.WriteLine("3. Run Scheduler");
+                Console.WriteLine("1. List All Tasks (From JSON)");
+                Console.WriteLine("2. Add New Task (Save to JSON)");
+                Console.WriteLine("3. Run Scheduler (On Loaded Tasks)");
                 Console.WriteLine("4. Exit");
                 Console.Write("Select: ");
                 
@@ -55,6 +57,11 @@ namespace FSM.Api
                 switch (choice)
                 {
                     case "1":
+                        Console.WriteLine("\n--- Current Task List ---");
+                        if (service.Tasks.Count == 0)
+                        {
+                            Console.WriteLine("No tasks found in JSON file.");
+                        }
                         foreach (var t in service.Tasks)
                         {
                             Console.WriteLine($"[ID: {t.Id}] {t.ClientName} - {t.Priority} (Window: {t.TimeWindowStart.Hour}-{t.TimeWindowEnd.Hour})");
@@ -68,8 +75,17 @@ namespace FSM.Api
                         break;
 
                     case "3":
+                        if (service.Tasks.Count == 0)
+                        {
+                            Console.WriteLine("\nNo tasks to schedule! Add a task first.");
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        Console.WriteLine("\nRunning optimization on loaded tasks...");
                         var results = await service.RunOptimizationAsync();
                         PrintResults(results);
+                        
                         Console.WriteLine("\nPress any key...");
                         Console.ReadKey();
                         break;
@@ -83,7 +99,8 @@ namespace FSM.Api
         static void AddNewTaskUI(FsmService service)
         {
             Console.WriteLine("\n--- New Task ---");
-            var t = new FSM.Domain.Entities.Task();
+            // Uses the alias defined at the top
+            var t = new TaskEntity();
             
             Console.Write("Client Name: ");
             t.ClientName = Console.ReadLine();
@@ -91,7 +108,6 @@ namespace FSM.Api
             Console.Write("Duration (hours): ");
             if(double.TryParse(Console.ReadLine(), out double dur)) t.Duration = TimeSpan.FromHours(dur);
             
-            // Defaults for Demo
             t.Priority = TaskPriority.Regular; 
             t.RequiredSkills = SkillSet.General; 
             t.TimeWindowStart = DateTime.Today.AddHours(9); 
@@ -100,7 +116,7 @@ namespace FSM.Api
             t.Longitude = 34.7818;
 
             service.AddTask(t);
-            Console.WriteLine("Task Saved!");
+            Console.WriteLine("Task Saved to JSON successfully!");
             System.Threading.Thread.Sleep(1000);
         }
 

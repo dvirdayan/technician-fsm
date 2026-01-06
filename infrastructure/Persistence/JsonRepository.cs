@@ -21,7 +21,7 @@ namespace FSM.Infrastructure.Persistence
             var options = new JsonSerializerOptions 
             { 
                 WriteIndented = true,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles // Prevents crashes on your Technician <-> Task loops
+                ReferenceHandler = ReferenceHandler.IgnoreCycles // Important for Tech <-> Schedule loops
             };
             
             string json = JsonSerializer.Serialize(data, options);
