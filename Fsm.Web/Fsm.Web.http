@@ -1,0 +1,6 @@
+@Fsm.Web_HostAddress = http://localhost:5182
+
+GET {{Fsm.Web_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

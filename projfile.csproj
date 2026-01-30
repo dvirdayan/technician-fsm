@@ -5,11 +5,16 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>FSM</RootNamespace>
   </PropertyGroup>
-<ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Fsm.Tests\**" />
     <EmbeddedResource Remove="Fsm.Tests\**" />
     <None Remove="Fsm.Tests\**" />
+    
+    <Compile Remove="Fsm.Web\**" />
+    <EmbeddedResource Remove="Fsm.Web\**" />
+    <None Remove="Fsm.Web\**" />
   </ItemGroup>
+
 </Project>

@@ -8,7 +8,7 @@ using FSM.Domain.Enums;
 // Alias to use your Domain Task easily
 using TaskEntity = FSM.Domain.Entities.Task;
 
-namespace FSM.Api
+namespace FSM.Cli
 {
     class Program
     {

@@ -42,7 +42,7 @@ namespace FSM.Application.Services
             
             if (!Technicians.Any())
             {
-                Technicians = FSM.Api.Program.GetDummyTechnicians();
+                Technicians = FSM.Cli.Program.GetDummyTechnicians();
                 _techRepo.Save(Technicians);
             }
         }
