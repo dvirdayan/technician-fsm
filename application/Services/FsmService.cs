@@ -63,8 +63,14 @@ namespace FSM.Application.Services
         //  technician methods
         public List<Technician> GetAllTechnicians() => Technicians;
 
-        public Technician AddTechnician(Technician tech)
+public Technician AddTechnician(Technician tech)
         {
+            // set default if no skill was sent
+            if (tech.Skills == FSM.Domain.Enums.SkillSet.None) 
+            {
+                tech.Skills = FSM.Domain.Enums.SkillSet.General;
+            }
+
             int newId = Technicians.Any() ? Technicians.Max(t => t.Id) + 1 : 1;
             tech.Id = newId;
             Technicians.Add(tech);
