@@ -7,62 +7,33 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔧</text></svg>">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
         /* --- GLOBAL LAYOUT --- */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* --- SIDEBAR (Fixed Split Layout) --- */
+        /* --- SIDEBAR --- */
         #sidebar { 
             width: 360px; 
             background: #f8f9fa; 
             border-right: 2px solid #dee2e6; 
             display: flex; 
             flex-direction: column; 
-            height: 100vh;
-        }
-
-        /* Section Headers (Non-Scrollable) */
-        .sidebar-header { padding: 15px 15px 5px 15px; background: #f8f9fa; z-index: 10; }
-        
-        /* Technician List: Fixed Height (Top 35%), Scrollable */
-        #tech-container {
-            padding: 0 15px 10px 15px;
-            max-height: 35vh; 
-            overflow-y: auto;
-            flex-shrink: 0;   /* Prevents squashing */
-            border-bottom: 2px solid #e9ecef;
-            background: #f1f3f5;
-        }
-
-        /* Task List: Fills Remaining Space, Scrollable */
-        #task-container {
-            padding: 10px 15px;
-            flex-grow: 1;     
+            height: 100vh; 
             overflow-y: auto; 
         }
+
+        .sidebar-header { padding: 15px 15px 5px 15px; background: #f8f9fa; }
+        #tech-container, #task-container { padding: 0 15px 10px 15px; overflow: visible; }
+        #task-container { padding-bottom: 40px; }
 
         h2 { margin: 0 0 10px 0; color: #343a40; font-size: 1.4rem; }
         h3 { margin: 10px 0 5px 0; color: #495057; font-size: 1.1rem; border-bottom: 2px solid #dee2e6; padding-bottom: 5px;}
 
-        /* --- MAP AREA --- */
+        /* --- MAP & CARDS --- */
         #map { flex-grow: 1; height: 100%; position: relative; }
-
-        /* Floating Stats Panel */
-        #stats-panel {
-            position: absolute; top: 20px; right: 20px; z-index: 1000;
-            background: white; padding: 15px; border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); min-width: 200px;
-        }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
-        .stat-val { font-weight: bold; color: #007bff; }
+        #stats-panel { position: absolute; top: 20px; right: 20px; z-index: 1000; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); min-width: 200px; }
         
-        /* --- CARDS & UI ELEMENTS --- */
-        .card { 
-            background: white; padding: 10px; border-radius: 6px; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #ced4da; 
-            display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;
-        }
+        .card { background: white; padding: 10px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #ced4da; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
         .status-scheduled { border-left: 5px solid #28a745; }
         .status-pending { border-left: 5px solid #ffc107; }
         .tech-card { border-left: 5px solid #007bff; background: #ffffff; }
@@ -74,9 +45,20 @@
         .btn-run { background: #6610f2; margin-bottom: 10px; } .btn-run:hover { background: #520dc2; }
         .btn-delete { background: transparent; color: #dc3545; border: 1px solid #dc3545; padding: 2px 6px; font-size: 14px; width: auto; }
         .btn-delete:hover { background: #dc3545; color: white; }
+        .btn-geo { background: #17a2b8; width: auto; padding: 8px 12px; margin-left: 5px; margin-bottom: 5px; } 
+        .btn-geo:hover { background: #138496; }
 
-        /* Leaflet Icons */
-        .tech-icon { font-size: 20px; text-align: center; line-height: 1; text-shadow: 0 0 3px white; }
+        /* --- LEAFLET CUSTOM MARKERS --- */
+        .tech-icon { font-size: 24px; text-align: center; line-height: 1; text-shadow: 0 0 3px white; }
+        
+        /* NEW: Numbered Icon Style */
+        .number-icon {
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%;
+            color: white; font-weight: bold; font-family: sans-serif;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        }
     </style>
 </head>
 <body>
@@ -88,7 +70,6 @@
             
             <div class="card" style="background: #e9ecef;">
                 <input type="text" id="techName" placeholder="Name (e.g. David)">
-                
                 <select id="techSkill">
                     <option value="1">🔨 General Helper</option>
                     <option value="2">⚡ Electrician</option>
@@ -97,25 +78,24 @@
                     <option value="16">❄️ HVAC Tech</option>
                     <option value="31">🌟 Master (All Skills)</option>
                 </select>
-
+                <div style="display: flex; align-items: center;">
+                    <input type="text" id="techAddress" placeholder="Address (e.g. Tel Aviv)">
+                    <button class="btn-geo" onclick="geocode('techAddress', 'techLat', 'techLon')">🔍</button>
+                </div>
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="techLat" placeholder="Base Lat">
-                    <input type="text" id="techLon" placeholder="Base Lon">
+                    <input type="text" id="techLat" placeholder="Lat" readonly style="background:#e9ecef; color:#666;">
+                    <input type="text" id="techLon" placeholder="Lon" readonly style="background:#e9ecef; color:#666;">
                 </div>
                 <button class="btn-add" onclick="addTechnician()" style="background: #007bff;">Recruit Tech</button>
             </div>
         </div>
 
-        <div id="tech-container">
-            <div id="tech-list"></div>
-        </div>
+        <div id="tech-container"><div id="tech-list"></div></div>
 
         <div class="sidebar-header" style="border-top: 1px solid #dee2e6; margin-top:0;">
             <h3>📦 Missions</h3>
-            
             <div class="card" style="background: #e9ecef;">
                 <input type="text" id="tName" placeholder="Client Name">
-                
                 <select id="tSkill">
                     <option value="1">🔨 General Task</option>
                     <option value="2">⚡ Electrical Issue</option>
@@ -123,20 +103,20 @@
                     <option value="8">🌐 Network Down</option>
                     <option value="16">❄️ HVAC Repair</option>
                 </select>
-
+                <div style="display: flex; align-items: center;">
+                    <input type="text" id="tAddress" placeholder="Address (e.g. Rothschild 10)">
+                    <button class="btn-geo" onclick="geocode('tAddress', 'tLat', 'tLon')">🔍</button>
+                </div>
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="tLat" placeholder="Lat">
-                    <input type="text" id="tLon" placeholder="Lon">
+                    <input type="text" id="tLat" placeholder="Lat" readonly style="background:#e9ecef; color:#666;">
+                    <input type="text" id="tLon" placeholder="Lon" readonly style="background:#e9ecef; color:#666;">
                 </div>
                 <button class="btn-add" onclick="addNewTask()">Create Task</button>
             </div>
-            
             <button class="btn-run" onclick="runScheduler()">🚀 Run Optimizer</button>
         </div>
 
-        <div id="task-container">
-            <div id="task-list">Loading...</div>
-        </div>
+        <div id="task-container"><div id="task-list">Loading...</div></div>
     </div>
 
     <div id="map">
@@ -147,30 +127,54 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <script>
-        // --- MAP INITIALIZATION ---
         var map = L.map('map').setView([32.0853, 34.7818], 11);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         
-        // --- LAYER GROUPS (For Clean Cleanup) ---
-        var taskLayer = L.layerGroup().addTo(map);   // Holds Task Markers
-        var routeLayer = L.layerGroup().addTo(map);  // Holds Route Lines
-        var techLayer = L.layerGroup().addTo(map);   // Holds Technician Houses
+        // Layers: Route (Bottom) -> Task (Middle) -> Tech (Top)
+        var routeLayer = L.layerGroup().addTo(map);
+        var taskLayer = L.layerGroup().addTo(map);
+        var techLayer = L.layerGroup().addTo(map);
 
-        // --- HELPER FUNCTIONS ---
         function getTechColor(id) {
             const colors = ['#007bff', '#dc3545', '#28a745', '#6f42c1', '#fd7e14', '#17a2b8'];
             return colors[(id - 1) % colors.length] || '#007bff';
         }
 
         function getSkillIcon(val) {
-            if (val >= 31) return "🌟"; // Master
-            if (val & 16) return "❄️";  // HVAC
-            if (val & 8) return "🌐";   // Network
-            if (val & 4) return "💧";   // Plumbing
-            if (val & 2) return "⚡";   // Electric
-            return "🔨";               // General
+            if (val >= 31) return "🌟";
+            if (val & 16) return "❄️";
+            if (val & 8) return "🌐";
+            if (val & 4) return "💧";
+            if (val & 2) return "⚡";
+            return "🔨";
+        }
+
+        // --- GEOCODING ---
+        async function geocode(inputId, latId, lonId) {
+            const address = document.getElementById(inputId).value;
+            if (!address) { alert("Please enter an address first."); return; }
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "⏳"; 
+
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+                const res = await fetch(url, { headers: { 'User-Agent': 'FsmApp/1.0' } });
+                const data = await res.json();
+
+                if (data && data.length > 0) {
+                    document.getElementById(latId).value = data[0].lat;
+                    document.getElementById(lonId).value = data[0].lon;
+                    const tempMarker = L.marker([data[0].lat, data[0].lon]).addTo(map)
+                        .bindPopup(`📍 Found: ${data[0].display_name}`).openPopup();
+                    map.setView([data[0].lat, data[0].lon], 14);
+                    setTimeout(() => map.removeLayer(tempMarker), 3000);
+                } else {
+                    alert("Address not found.");
+                }
+            } catch (err) { console.error(err); alert("Error connecting to Geocoding service."); } 
+            finally { btn.innerText = originalText; }
         }
 
         // --- TECHNICIAN LOGIC ---
@@ -180,10 +184,9 @@
                 const techs = await res.json();
                 const list = document.getElementById('tech-list');
                 list.innerHTML = "";
-                
-                techLayer.clearLayers(); // Wipe old markers
+                techLayer.clearLayers();
 
-                if(techs.length === 0) list.innerHTML = "<small style='padding:10px;'>No technicians recruited.</small>";
+                if(techs.length === 0) list.innerHTML = "<small style='padding:10px;'>No technicians.</small>";
 
                 techs.forEach(t => {
                     const icon = getSkillIcon(t.skills);
@@ -193,23 +196,16 @@
                     
                     div.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <div>
-                                <strong>${icon} ${t.name}</strong><br>
-                                <small>🏠 Base: ${t.baseLatitude}, ${t.baseLongitude}</small>
-                            </div>
-                            <button class="btn-delete" onclick="deleteTechnician(${t.id})" title="Fire Technician">✕</button>
+                            <div><strong>${icon} ${t.name}</strong><br><small>🏠 Base: ${t.baseLatitude}, ${t.baseLongitude}</small></div>
+                            <button class="btn-delete" onclick="deleteTechnician(${t.id})">✕</button>
                         </div>
-                        <button style="width:100%; margin-top:5px; padding:4px; font-size:12px; background:#6c757d;" 
-                                onclick="showSchedule(${t.id}, '${t.name}')">📅 Schedule</button>
+                        <button style="width:100%; margin-top:5px; padding:4px; font-size:12px; background:#6c757d;" onclick="showSchedule(${t.id}, '${t.name}')">📅 Schedule</button>
                     `;
                     list.appendChild(div);
 
                     if (t.baseLatitude && t.baseLongitude) {
-                        const mapIcon = L.divIcon({ html: `<div class="tech-icon">${icon}</div>`, className: 'dummy', iconSize: [24, 24] });
-                        
-                        L.marker([t.baseLatitude, t.baseLongitude], { icon: mapIcon })
-                            .bindPopup(`<b>${t.name}</b>`)
-                            .addTo(techLayer); 
+                        const mapIcon = L.divIcon({ html: `<div class="tech-icon">${icon}</div>`, className: 'dummy', iconSize: [30, 30] });
+                        L.marker([t.baseLatitude, t.baseLongitude], { icon: mapIcon }).bindPopup(`<b>${t.name}</b>`).addTo(techLayer); 
                     }
                 });
             } catch (err) { console.error("Error loading techs:", err); }
@@ -220,15 +216,14 @@
             const skill = parseInt(document.getElementById('techSkill').value);
             const lat = parseFloat(document.getElementById('techLat').value);
             const lon = parseFloat(document.getElementById('techLon').value);
-
-            if(!name || !lat || !lon) { alert("Missing fields"); return; }
+            if(!name || !lat || !lon) { alert("Please search for an address first!"); return; }
 
             await fetch('/api/technicians', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ Name: name, Skills: skill, BaseAddress: "HQ", BaseLatitude: lat, BaseLongitude: lon })
             });
-            document.getElementById('techName').value = "";
+            document.getElementById('techName').value = ""; document.getElementById('techAddress').value = "";
             loadTechnicians(); 
         }
 
@@ -242,7 +237,6 @@
             const res = await fetch('/api/tasks');
             const tasks = await res.json();
             const myTasks = tasks.filter(t => t.assignedTechnicianId === techId).sort((a,b) => a.sequenceIndex - b.sequenceIndex);
-            
             let msg = `📅 Schedule for ${techName}:\n--------------------------\n08:00 🏠 Start\n`;
             myTasks.forEach(t => {
                 const start = t.actualStartTime ? new Date(t.actualStartTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "--:--";
@@ -258,8 +252,6 @@
                 const tasks = await res.json();
                 const list = document.getElementById('task-list');
                 list.innerHTML = "";
-                
-                // CRITICAL CLEANUP: Wipe old tasks and lines
                 taskLayer.clearLayers();
                 routeLayer.clearLayers();
 
@@ -281,22 +273,32 @@
                     list.appendChild(div);
 
                     if (task.latitude && task.longitude) {
-                        const color = task.status === 1 ? getTechColor(task.assignedTechnicianId) : 'orange';
+                        const isScheduled = task.status === 1;
+                        const color = isScheduled ? getTechColor(task.assignedTechnicianId) : '#fd7e14'; // Orange for pending
                         
-                        // Add to Task Layer
-                        L.circleMarker([task.latitude, task.longitude], {
-                            radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
-                        }).bindPopup(`<b>${icon} ${task.clientName}</b>`)
-                          .addTo(taskLayer);
+                        // NEW: NUMBERED MARKER LOGIC
+                        let markerHtml = "";
+                        if (isScheduled) {
+                            // Show Sequence Number
+                            markerHtml = `<div class="number-icon" style="background-color: ${color}; width: 24px; height: 24px;">${task.sequenceIndex}</div>`;
+                        } else {
+                            // Show Skill Icon for pending
+                            markerHtml = `<div class="number-icon" style="background-color: ${color}; width: 24px; height: 24px; font-size: 14px;">${icon}</div>`;
+                        }
 
-                        if (task.status === 1 && task.assignedTechnicianId) {
+                        const customIcon = L.divIcon({ className: 'dummy', html: markerHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
+                        
+                        L.marker([task.latitude, task.longitude], { icon: customIcon })
+                            .bindPopup(`<b>${icon} ${task.clientName}</b>`)
+                            .addTo(taskLayer);
+
+                        if (isScheduled && task.assignedTechnicianId) {
                             if (!techRoutes[task.assignedTechnicianId]) techRoutes[task.assignedTechnicianId] = [];
                             techRoutes[task.assignedTechnicianId].push(task);
                         }
                     }
                 });
 
-                // Draw Routes on Route Layer
                 Object.keys(techRoutes).forEach(techId => {
                     const route = techRoutes[techId];
                     route.sort((a, b) => a.sequenceIndex - b.sequenceIndex);
@@ -308,13 +310,7 @@
                         const p2 = L.latLng(route[i+1].latitude, route[i+1].longitude);
                         totalDist += p1.distanceTo(p2) / 1000;
                     }
-                    
-                    L.polyline(latlngs, { 
-                        color: getTechColor(techId), 
-                        weight: 4, 
-                        opacity: 0.7, 
-                        dashArray: '5, 10' 
-                    }).addTo(routeLayer);
+                    L.polyline(latlngs, { color: getTechColor(techId), weight: 4, opacity: 0.7, dashArray: '5, 10' }).addTo(routeLayer);
                 });
 
                 document.getElementById('stat-count').innerText = tasks.length;
@@ -328,15 +324,14 @@
             const skill = parseInt(document.getElementById('tSkill').value);
             const lat = parseFloat(document.getElementById('tLat').value);
             const lon = parseFloat(document.getElementById('tLon').value);
-
-            if(!name || !lat || !lon) { alert("Missing fields"); return; }
+            if(!name || !lat || !lon) { alert("Please search for an address first!"); return; }
 
             await fetch('/api/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ Id: 0, ClientName: name, RequiredSkills: skill, Latitude: lat, Longitude: lon, Duration: "01:00:00", Priority: 1 })
             });
-            document.getElementById('tName').value = "";
+            document.getElementById('tName').value = ""; document.getElementById('tAddress').value = "";
             loadTasks();
         }
 
@@ -354,7 +349,6 @@
             btn.innerText = "🚀 Run Optimizer";
         }
 
-        // Start App
         loadTechnicians();
         loadTasks();
     </script>
