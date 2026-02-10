@@ -1,0 +1,30 @@
+[
+  {
+    "Id": 1,
+    "Name": "David (Tel Aviv)",
+    "BaseAddress": null,
+    "BaseLatitude": 32.0853,
+    "BaseLongitude": 34.7818,
+    "Skills": 31,
+    "ShiftStart": "08:00:00",
+    "ShiftEnd": "18:00:00",
+    "MaxConcurrentTasks": 1,
+    "EstimatedTravelSpeedKmH": 60,
+    "HourlyCost": 0,
+    "Schedules": []
+  },
+  {
+    "Id": 2,
+    "Name": "Sarah (Haifa)",
+    "BaseAddress": null,
+    "BaseLatitude": 32.794,
+    "BaseLongitude": 34.9896,
+    "Skills": 31,
+    "ShiftStart": "08:00:00",
+    "ShiftEnd": "18:00:00",
+    "MaxConcurrentTasks": 1,
+    "EstimatedTravelSpeedKmH": 60,
+    "HourlyCost": 0,
+    "Schedules": []
+  }
+]
