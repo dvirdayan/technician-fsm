@@ -1,5 +1,0 @@
-C:\Users\dabur\Desktop\school\technician-fsm\obj\Debug\net7.0\projfile.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\dabur\Desktop\school\technician-fsm\obj\Debug\net7.0\projfile.AssemblyInfoInputs.cache
-C:\Users\dabur\Desktop\school\technician-fsm\obj\Debug\net7.0\projfile.AssemblyInfo.cs
-C:\Users\dabur\Desktop\school\technician-fsm\obj\Debug\net7.0\projfile.csproj.CoreCompileInputs.cache
-C:\Users\dabur\Desktop\school\technician-fsm\obj\Debug\net7.0\projfile.sourcelink.json
